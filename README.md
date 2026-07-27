@@ -1,0 +1,2 @@
+# AI-odysseus-
+Pribadi
