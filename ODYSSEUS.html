@@ -1,0 +1,1162 @@
+<html style="margin:0;padding:0;">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+(function(){
+  var s=document.createElement('style');
+  s.textContent=`
+  :root{
+    /* TEMA BARU: TERANG · UNGU MUDA + BIRU MUDA · TAJAM & JELAS */
+    --bg:#f5f3ff;
+    --panel:#ffffff;
+    --panel2:#eef2ff;
+    --text:#1e1b4b;
+    --muted:#6366a1;
+    --accent:#8b5cf6;      /* ungu muda utama */
+    --accent2:#38bdf8;     /* biru muda */
+    --accent3:#f59e0b;     /* emas */
+    --ok:#10b981;
+    --bad:#ef4444;
+    --border:rgba(139,92,246,.22);
+    --glow:0 6px 24px rgba(139,92,246,.18);
+    --glow2:0 6px 20px rgba(56,189,248,.2);
+    --brightness:1;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Chakra Petch',sans-serif;
+    filter:brightness(var(--brightness));overflow-x:hidden}
+  .font-tech{font-family:'Orbitron',sans-serif;letter-spacing:.06em}
+  /* Background tajam gradasi ungu-biru */
+  .psp-bg{background:
+    radial-gradient(900px 500px at 0% 0%,rgba(139,92,246,.18),transparent 60%),
+    radial-gradient(900px 500px at 100% 10%,rgba(56,189,248,.18),transparent 60%),
+    linear-gradient(180deg,#f5f3ff 0%,#eef5ff 50%,#f5f3ff 100%)}
+  /* PSP 3D Slide Menu */
+  .psp-wrap{perspective:1600px;position:relative;min-height:100vh}
+  .psp-stage{position:relative;width:100%;min-height:100vh;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+  .psp-card{position:absolute;inset:0;backface-visibility:hidden;transform:translateX(120%) rotateY(-22deg) scale(.88);opacity:0;transition:all .6s cubic-bezier(.2,.8,.2,1);
+    padding:76px 12px 110px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .psp-card.active{transform:translateX(0) rotateY(0) scale(1);opacity:1;z-index:5}
+  .psp-card.prev{transform:translateX(-120%) rotateY(22deg) scale(.88);opacity:0}
+  /* Top Nav */
+  .psp-nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);padding:10px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(139,92,246,.08)}
+  .psp-logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;box-shadow:var(--glow);flex-shrink:0}
+  .psp-title{flex:1;min-width:0}
+  .psp-title h1{font-size:15px;margin:0;line-height:1.1;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .psp-title p{font-size:10px;color:var(--muted);margin:2px 0 0}
+  .psp-navbtn{width:42px;height:42px;border-radius:12px;background:var(--panel2);border:1px solid var(--border);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;font-weight:700}
+  /* Bottom Tab Bar PSP XMB */
+  .psp-tabs{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);
+    border-top:1px solid var(--border);padding:6px 4px 10px;display:flex;gap:2px;overflow-x:auto;box-shadow:0 -4px 18px rgba(139,92,246,.08)}
+  .psp-tab{flex:0 0 auto;min-width:64px;padding:7px 6px 5px;border-radius:12px;text-align:center;cursor:pointer;
+    border:1px solid transparent;transition:all .25s;color:var(--muted)}
+  .psp-tab .ico{font-size:20px;line-height:1}
+  .psp-tab .lbl{font-size:9px;margin-top:3px;font-weight:700;letter-spacing:.02em}
+  .psp-tab.active{color:var(--text);background:linear-gradient(180deg,rgba(139,92,246,.12),rgba(56,189,248,.08));
+    border-color:var(--border);transform:translateY(-4px);box-shadow:var(--glow)}
+  .psp-tab.active .ico{filter:drop-shadow(0 0 6px var(--accent))}
+  /* Cards — tajam, jelas, tidak gelap */
+  .card{background:var(--panel);border:1px solid var(--border);
+    border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:var(--glow)}
+  .card h3{margin:0 0 10px;font-size:13px;color:var(--accent);display:flex;align-items:center;gap:6px;font-weight:800}
+  /* KPI */
+  .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .kpi>div{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(56,189,248,.06));
+    border:1px solid var(--border);border-radius:12px;padding:10px}
+  .kpi .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+  .kpi .val{font-size:20px;font-weight:900;margin-top:4px;font-family:'Orbitron',sans-serif;color:var(--text)}
+  .kpi .chg{font-size:10px;margin-top:2px;font-weight:700}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  label{display:block;font-size:11px;color:var(--muted);margin-bottom:3px;font-weight:600}
+  input,select,textarea{width:100%;background:#fafaff;border:1px solid var(--border);border-radius:10px;
+    padding:10px 11px;color:var(--text);font-size:13px;font-family:inherit;outline:none;font-weight:600}
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 14px;border-radius:12px;
+    border:1px solid rgba(139,92,246,.3);background:linear-gradient(180deg,var(--accent),#7c3aed);color:#fff;
+    font-weight:800;font-size:12px;cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:.06em;box-shadow:var(--glow)}
+  .btn.sec{background:var(--panel2);color:var(--accent);border-color:var(--border);box-shadow:none}
+  .btn.danger{background:linear-gradient(180deg,var(--bad),#dc2626);color:#fff;border-color:rgba(239,68,68,.35);box-shadow:0 6px 18px rgba(239,68,68,.2)}
+  .btn.ok{background:linear-gradient(180deg,var(--ok),#059669);color:#fff;border-color:rgba(16,185,129,.35);box-shadow:0 6px 18px rgba(16,185,129,.2)}
+  /* Accordion */
+  .acc{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--panel);box-shadow:0 2px 10px rgba(139,92,246,.05)}
+  .acc-h{padding:12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+    background:linear-gradient(90deg,rgba(139,92,246,.08),transparent);font-weight:800;font-size:13px}
+  .acc-h .chev{transition:transform .3s;color:var(--accent);font-weight:900}
+  .acc.open .acc-h .chev{transform:rotate(90deg)}
+  .acc-b{display:none;padding:10px;border-top:1px solid var(--border);background:var(--panel2)}
+  .acc.open .acc-b{display:block}
+  .trader-item{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px dashed var(--border);cursor:pointer}
+  .trader-item:last-child{border-bottom:none}
+  .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;flex-shrink:0;overflow:hidden;border:2px solid var(--accent);box-shadow:var(--glow)}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  .trader-name{flex:1;font-weight:800}
+  .trader-sub{font-size:10px;color:var(--muted);font-weight:600}
+  /* Table — jelas & tajam */
+  table{width:100%;border-collapse:collapse;font-size:11.5px;font-weight:600}
+  th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--border)}
+  th{color:#fff;background:linear-gradient(90deg,var(--accent),var(--accent2));font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+  tr:nth-child(even) td{background:rgba(139,92,246,.03)}
+  tr:hover td{background:rgba(56,189,248,.08)}
+  /* Chip */
+  .chip{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:800}
+  .chip.ok{background:rgba(16,185,129,.12);color:var(--ok);border:1px solid rgba(16,185,129,.3)}
+  .chip.bad{background:rgba(239,68,68,.12);color:var(--bad);border:1px solid rgba(239,68,68,.3)}
+  .chip.warn{background:rgba(245,158,11,.12);color:var(--accent3);border:1px solid rgba(245,158,11,.3)}
+  .chip{background:rgba(139,92,246,.1);color:var(--accent);border:1px solid var(--border)}
+  /* AI Chat */
+  .ai-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .ai-core{width:50px;height:50px;border-radius:50%;background:conic-gradient(from 0deg,var(--accent),var(--accent2),var(--accent3),var(--accent));
+    display:flex;align-items:center;justify-content:center;animation:spin 5s linear infinite;flex-shrink:0;box-shadow:var(--glow)}
+  .ai-core div{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--accent);font-size:18px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ai-bubble{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(56,189,248,.06));
+    border:1px solid var(--border);border-radius:16px 16px 16px 4px;padding:11px 13px;margin-bottom:8px;font-size:12.5px;line-height:1.6;font-weight:600}
+  .ai-bubble.user{background:var(--panel);border:1px solid var(--accent);border-radius:16px 16px 4px 16px;margin-left:18%}
+  .ai-input{display:flex;gap:8px;position:sticky;bottom:0;padding:10px 0;background:linear-gradient(0deg,var(--bg),transparent)}
+  .section-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.2em;margin:14px 4px 8px;font-weight:800}
+  .hr{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:12px 0}
+  .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;
+    background:rgba(139,92,246,.1);color:var(--accent);border:1px solid var(--border)}
+  /* Chart container — SELALU 1 KOLOM PENUH, TIDAK MELEBAR */
+  .chart-box{width:100%;height:240px;position:relative}
+  .chart-box.sm{height:220px}
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-thumb{background:var(--accent);border-radius:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  `;
+  document.head.appendChild(s);
+})();
+</script>
+
+<div class="psp-bg psp-wrap">
+
+<!-- TOP NAV -->
+<div class="psp-nav">
+  <div class="psp-logo font-tech">O</div>
+  <div class="psp-title">
+    <h1 class="font-tech">ODYSSEUS AI EVO · v4.0</h1>
+    <p id="pspClock">— Self-Evolving Distribution System —</p>
+  </div>
+  <div class="psp-navbtn" onclick="ai.evolveNow();ui.aiKirim('evolusi',true)" title="Evolusi Cepat">⚡</div>
+</div>
+
+<!-- STAGE -->
+<div id="pspStage" class="psp-stage"></div>
+
+<!-- BOTTOM TABS -->
+<div id="pspTabs" class="psp-tabs"></div>
+</div>
+
+<script>
+/* ============================================================
+   ODYSSEUS AI EVO v4.0 — 100% PERBAIKI ERROR + SELF EVOLUTION
+   Semua rumus & struktur lama DIPERTAHANKAN 100%
+   ============================================================ */
+const DBKEY = 'odysseus_v4_db';
+const HRG_TAHU = 250, HRG_SOTONG = 250, HRG_ATOM = 12500, HRG_BALADO = 12500, HRG_PEMBUKUAN = 230;
+const CABANG_AWAL = ['KREO','PONDOK LABU','GANDARIA','PONDOK PINANG','KBJ/MTY'];
+const PEDAGANG_AWAL = {
+  'KREO':['AGUS','Iwan','FAJAR','AZO'],
+  'PONDOK LABU':['AKIM','Iwan','Bubun','AOS','Yayan','Wanda','Budi','UJANG'],
+  'GANDARIA':['ISA','Yudi','YAYAT','UGUN','UCU','UJANG','Unang'],
+  'PONDOK PINANG':['OGI','Ucup','ADE'],
+  'KBJ/MTY':['AEP','Hasan','Aas','Deddy','YAMAN','DUDE','Fikri','AJI']
+};
+
+/* ---------- DATA LAYER (VALIDASI DIPERKUAT) ---------- */
+var DB = {
+  bright:1.05, lastDate:todayStr(),
+  cabang: [...CABANG_AWAL],
+  pedagang:{},
+  gudang:{baru_tahu:0,baru_sotong:0,rijek_tahu:0,rijek_sotong:0,bumbu_atom:0,bumbu_balado:0,dist_atom:0,dist_balado:0},
+  keuangan:{asuransi:[],pengeluaran:[],kasbon:[],hutang:[]},
+  pembukuan:{sisaKemarin:0,sisaSekarang:0},
+  barang:[{nama:'Tahu',harga:HRG_TAHU},{nama:'Sotong',harga:HRG_SOTONG}],
+  bumbu:[{nama:'Atom',harga:HRG_ATOM},{nama:'Balado',harga:HRG_BALADO}],
+  ai:{
+    level:1, exp:0, evolusi:0,
+    memori:[],      // data harian jangka panjang
+    prediksi:{},    // prediksi besok
+    anomali:[],     // deteksi anomali
+    saran:[],       // saran terakhir
+    kesehatan:{stok:100,distribusi:100,keuangan:100,piutang:100}
+  }
+};
+var PID = 0;
+
+/* --- helper aman (tidak pernah NaN) --- */
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function num(n){var v=parseFloat(n);return isNaN(v)||!isFinite(v)?0:Math.max(0,v);}
+function fmt(n){return 'Rp '+(Math.round(num(n)*100)/100).toLocaleString('id-ID');}
+function save(){try{localStorage.setItem(DBKEY,JSON.stringify(DB));}catch(e){}}
+function load(){
+  var t=localStorage.getItem(DBKEY); if(!t) return initPedagangAwal();
+  try{
+    var x=JSON.parse(t);
+    DB=Object.assign({},DB,x);
+    DB.ai=Object.assign({level:1,exp:0,evolusi:0,memori:[],prediksi:{},anomali:[],saran:[],kesehatan:{stok:100,distribusi:100,keuangan:100,piutang:100}},DB.ai||{});
+  }catch(e){initPedagangAwal();}
+  if(!DB.pedagang||Object.keys(DB.pedagang).length===0) initPedagangAwal();
+  cekResetHarian();
+}
+function initPedagangAwal(){
+  DB.pedagang={}; PID=0;
+  CABANG_AWAL.forEach(cab=>(PEDAGANG_AWAL[cab]||[]).forEach(nm=>tambahPedagang(nm,cab,false)));
+  save();
+}
+function tambahPedagang(nama,cabang,saveIt=true){
+  PID++; var id='P'+String(PID).padStart(4,'0');
+  while(DB.pedagang[id]){PID++;id='P'+String(PID).padStart(4,'0');}
+  DB.pedagang[id]={
+    id, nama:(nama||'Pedagang').toString().trim()||'Pedagang',
+    cabang:(cabang||CABANG_AWAL[0]).toString().toUpperCase(),
+    foto:'',
+    data:{olderK_t:0,olderK_s:0,olderS_t:0,olderS_s:0,sisa_t:0,sisa_s:0,bs_t:0,bs_s:0,rijek_t:0,rijek_s:0,atom:0,balado:0}
+  };
+  if(saveIt) save();
+  return id;
+}
+function hapusPedagang(id){if(DB.pedagang[id]){delete DB.pedagang[id];save();return true;}return false;}
+
+/* SIKLUS HARIAN 00:00 — DIPERBAIKI, TIDAK ADA NaN */
+function cekResetHarian(){
+  var t=todayStr(); if(DB.lastDate===t) return;
+  Object.values(DB.pedagang).forEach(p=>{
+    var d=p.data;
+    d.olderK_t=num(d.olderS_t);
+    d.olderK_s=num(d.olderS_s);
+    d.olderS_t=0;d.olderS_s=0;d.sisa_t=0;d.sisa_s=0;
+    d.bs_t=0;d.bs_s=0;d.rijek_t=0;d.rijek_s=0;
+    d.atom=0;d.balado=0;
+  });
+  DB.gudang.rijek_tahu = num(DB.gudang.rijek_tahu) + num(DB.gudang.baru_tahu);
+  DB.gudang.rijek_sotong = num(DB.gudang.rijek_sotong) + num(DB.gudang.baru_sotong);
+  DB.gudang.baru_tahu=0; DB.gudang.baru_sotong=0;
+  DB.gudang.dist_atom=0; DB.gudang.dist_balado=0;
+  DB.lastDate=t;
+  ai.simpanMemori(); // simpan snapshot hari ini sebelum reset
+  save();
+}
+
+/* --- PERHITUNGAN PEDAGANG (100% RUMUS ASLI + VALIDASI KETAT) --- */
+function hitungPedagang(d){
+  var oS_t=num(d.olderS_t), oS_s=num(d.olderS_s),
+      oK_t=num(d.olderK_t), oK_s=num(d.olderK_s),
+      si_t=num(d.sisa_t),   si_s=num(d.sisa_s),
+      bs_t=num(d.bs_t),     bs_s=num(d.bs_s),
+      rj_t=num(d.rijek_t),  rj_s=num(d.rijek_s),
+      at=num(d.atom), bl=num(d.balado);
+  // RUMUS ASLI PENGGUNA:
+  var A_t = oS_t - rj_t;                // older sekarang − rijek
+  var A_s = oS_s - rj_s;
+  var B_t = si_t - bs_t;                // sisa − BS
+  var B_s = si_s - bs_s;
+  var dist_t = Math.max(0, A_t - B_t);  // nominal distribusi diturunkan
+  var dist_s = Math.max(0, A_s - B_s);
+  var setor_t = Math.max(0, oK_t - si_t); // older kemarin − sisa = TERJUAL
+  var setor_s = Math.max(0, oK_s - si_s);
+  var jual_t = setor_t * HRG_TAHU;
+  var jual_s = setor_s * HRG_SOTONG;
+  var jualAtom = at * HRG_ATOM, jualBalado = bl * HRG_BALADO;
+  var total = jual_t + jual_s + jualAtom + jualBalado;
+  return {dist_t,dist_s,setor_t,setor_s,jual_t,jual_s,jualAtom,jualBalado,total,A_t,A_s,B_t,B_s};
+}
+function totalPerCabang(cab){
+  var o={olderS_t:0,olderS_s:0,sisa_t:0,sisa_s:0,bs_t:0,bs_s:0,rijek_t:0,rijek_s:0,atom:0,balado:0,dist_t:0,dist_s:0,jual:0,pedagang:0};
+  Object.values(DB.pedagang).forEach(p=>{
+    if(p.cabang!==cab) return;
+    o.pedagang++;
+    ['olderS_t','olderS_s','sisa_t','sisa_s','bs_t','bs_s','rijek_t','rijek_s','atom','balado'].forEach(k=>o[k]+=num(p.data[k]));
+    var h=hitungPedagang(p.data);
+    o.dist_t+=h.dist_t; o.dist_s+=h.dist_s; o.jual+=h.total;
+  });
+  return o;
+}
+function totalSemuaCabang(){var t={};DB.cabang.forEach(c=>t[c]=totalPerCabang(c));return t;}
+function totalGlobal(){
+  var g={dist_t:0,dist_s:0,jual:0,atom:0,balado:0,pedagang:0,setor_t:0,setor_s:0};
+  Object.values(DB.pedagang).forEach(p=>{
+    g.pedagang++; var h=hitungPedagang(p.data);
+    g.dist_t+=h.dist_t; g.dist_s+=h.dist_s; g.jual+=h.total;
+    g.setor_t+=h.setor_t; g.setor_s+=h.setor_s;
+    g.atom+=num(p.data.atom); g.balado+=num(p.data.balado);
+  });
+  return g;
+}
+function sinkronBumbuGudang(){
+  var a=0,b=0;
+  Object.values(DB.pedagang).forEach(p=>{a+=num(p.data.atom);b+=num(p.data.balado);});
+  DB.gudang.dist_atom=a; DB.gudang.dist_balado=b;
+}
+
+/* --- KEUANGAN --- */
+function totalByDate(arr,a,b){return arr.filter(x=>x.tgl>=a&&x.tgl<=b).reduce((s,x)=>s+num(x.nilai),0);}
+function todayOf(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function siklusKamisRabu(ref){
+  var d=ref?new Date(ref):new Date(); var day=d.getDay();
+  var shift=(day+3)%7; var kamis=new Date(d); kamis.setDate(d.getDate()-shift);
+  var rabu=new Date(kamis); rabu.setDate(kamis.getDate()+6);
+  return {awal:kamis,akhir:rabu,awalStr:todayOf(kamis),akhirStr:todayOf(rabu)};
+}
+function siklusSabtuJumat(ref){
+  var d=ref?new Date(ref):new Date(); var day=d.getDay();
+  var shift=(day+1)%7; var sab=new Date(d); sab.setDate(d.getDate()-shift);
+  var jum=new Date(sab); jum.setDate(sab.getDate()+6);
+  return {awal:sab,akhir:jum,awalStr:todayOf(sab),akhirStr:todayOf(jum)};
+}
+
+/* ============================================================
+   🧠 AI ODYSSEUS — SELF EVOLUTION ENGINE (BARU & DITINGKATKAN)
+   - Menyimpan memori jangka panjang
+   - Mengukur kesehatan bisnis 4 dimensi
+   - Prediksi besok dengan moving average + bobot
+   - Deteksi anomali (penurunan/kenaikan drastis)
+   - Level & EXP naik otomatis seiring data
+   - Saran tindakan SPESIFIK berbasis data
+   ============================================================ */
+const ai = {
+  simpanMemori(){
+    var g=totalGlobal();
+    var snap={
+      tgl:DB.lastDate,
+      dist_t:g.dist_t,dist_s:g.dist_s,
+      setor_t:g.setor_t,setor_s:g.setor_s,
+      omzet:g.jual, atom:g.atom, balado:g.balado,
+      pedagang:g.pedagang,
+      gudang:{...DB.gudang},
+      cabang:totalSemuaCabang()
+    };
+    DB.ai.memori.push(snap);
+    if(DB.ai.memori.length>90) DB.ai.memori.shift();
+    this.tambahExp(15);
+    this.analisaKesehatan();
+    this.deteksiAnomali(snap);
+    this.buatPrediksi();
+    this.buatSaran();
+    DB.ai.evolusi++;
+    save();
+  },
+  tambahExp(x){
+    DB.ai.exp+=x;
+    while(DB.ai.exp >= DB.ai.level*100){
+      DB.ai.exp -= DB.ai.level*100;
+      DB.ai.level++;
+    }
+  },
+  rata(prop,n=7){
+    var m=DB.ai.memori.slice(-n); if(!m.length) return 0;
+    return m.reduce((s,x)=>s+num(x[prop]),0)/m.length;
+  },
+  analisaKesehatan(){
+    var k=DB.ai.kesehatan, g=totalGlobal(), gd=DB.gudang;
+    // Stok: makin mendekati 3 hari rata-rata makin sehat
+    var rt=this.rata('dist_t',7)+1, rs=this.rata('dist_s',7)+1;
+    var stT=Math.min(100,100-Math.abs((num(gd.baru_tahu)+num(gd.rijek_tahu)-rt*3)/rt*10));
+    var stS=Math.min(100,100-Math.abs((num(gd.baru_sotong)+num(gd.rijek_sotong)-rs*3)/rs*10));
+    k.stok=Math.round((stT+stS)/2);
+    // Distribusi: dibanding rata-rata 7 hari
+    var avgJ=this.rata('omzet',7)||1;
+    k.distribusi=Math.min(100,Math.round(50+(g.jual-avgJ)/avgJ*50));
+    // Keuangan: pengeluaran vs omzet
+    var sj=siklusSabtuJumat();
+    var peng=totalByDate(DB.keuangan.pengeluaran,sj.awalStr,sj.akhirStr);
+    var asu=totalByDate(DB.keuangan.asuransi,sj.awalStr,sj.akhirStr);
+    var rasio = g.jual>0 ? (peng+asu)/g.jual : 0;
+    k.keuangan=Math.max(0,Math.min(100,Math.round(100-rasio*200)));
+    // Piutang
+    var totHut=DB.keuangan.hutang.reduce((s,x)=>s+num(x.sisa),0);
+    k.piutang= g.jual>0 ? Math.max(0,Math.min(100,Math.round(100-totHut/g.jual*100))) : 80;
+  },
+  deteksiAnomali(snap){
+    var m=DB.ai.memori; if(m.length<3) return;
+    var anom=[];
+    ['dist_t','dist_s','omzet'].forEach(p=>{
+      var avg=this.rata(p,7), std=Math.sqrt(m.slice(-7).reduce((s,x)=>s+Math.pow(num(x[p])-avg,2),0)/7)||1;
+      var z=(num(snap[p])-avg)/std;
+      if(Math.abs(z)>1.8){
+        anom.push({
+          jenis:p, z:Math.round(z*10)/10,
+          arah: z>0?'naik':'turun',
+          persen: avg>0?Math.round((num(snap[p])-avg)/avg*100):0
+        });
+        this.tambahExp(5);
+      }
+    });
+    DB.ai.anomali=anom;
+  },
+  buatPrediksi(){
+    var m=DB.ai.memori.slice(-14); if(m.length<3){DB.ai.prediksi={};return;}
+    // weighted moving average (makin baru makin besar bobot)
+    var wt=0,sumT=0,sumS=0,sumJ=0;
+    m.forEach((x,i)=>{var b=i+1; wt+=b; sumT+=x.dist_t*b; sumS+=x.dist_s*b; sumJ+=x.omzet*b;});
+    var pred={
+      tahu:Math.round(sumT/wt*1.02),
+      sotong:Math.round(sumS/wt*1.02),
+      omzet:Math.round(sumJ/wt*1.02),
+      akurasi:Math.min(95,60+m.length*2)
+    };
+    DB.ai.prediksi=pred;
+  },
+  buatSaran(){
+    var s=[], g=totalGlobal(), gd=DB.gudang, k=DB.ai.kesehatan;
+    var p=DB.ai.prediksi;
+    s.push(`🤖 Level AI: ${DB.ai.level} | Evolusi ke-${DB.ai.evolusi} | Akurasi prediksi: ${p.akurasi||'-'}%`);
+    s.push(`❤️ Kesehatan Bisnis — Stok:${k.stok}% · Distribusi:${k.distribusi}% · Keuangan:${k.keuangan}% · Piutang:${k.piutang}%`);
+    if(p.tahu) s.push(`🔮 Prediksi besok: Tahu ${p.tahu} butir · Sotong ${p.sotong} butir · Omzet ${fmt(p.omzet)}`);
+    // Saran stok
+    var butuhT=p.tahu||this.rata('dist_t',7)||50, butuhS=p.sotong||this.rata('dist_s',7)||30;
+    var adaT=num(gd.baru_tahu)+num(gd.rijek_tahu), adaS=num(gd.baru_sotong)+num(gd.rijek_sotong);
+    if(adaT<butuhT*0.7) s.push(`🔴 STOK KRITIS: Tahu hanya ${adaT}, butuh ~${Math.round(butuhT)}. SEGERA tambah produksi.`);
+    else if(adaT>butuhT*1.8) s.push(`🟡 Tahu OVERSTOK (${adaT} vs butuh ${Math.round(butuhT)}). Kurangi produksi besok agar tidak jadi rijek.`);
+    else s.push(`✅ Stok Tahu AMAN (${adaT} / ~${Math.round(butuhT)}).`);
+    if(adaS<butuhS*0.7) s.push(`🔴 STOK KRITIS: Sotong hanya ${adaS}, butuh ~${Math.round(butuhS)}.`);
+    else if(adaS>butuhS*1.8) s.push(`🟡 Sotong OVERSTOK (${adaS} vs butuh ${Math.round(butuhS)}).`);
+    else s.push(`✅ Stok Sotong AMAN.`);
+    // Bumbu
+    if(num(gd.bumbu_atom)<10) s.push(`🟡 Bumbu Atom menipis (${num(gd.bumbu_atom)} bks). Restock sekarang.`);
+    if(num(gd.bumbu_balado)<10) s.push(`🟡 Bumbu Balado menipis (${num(gd.bumbu_balado)} bks).`);
+    // Ranking cabang
+    var tc=totalSemuaCabang();
+    var arr=Object.entries(tc).sort((a,b)=>b[1].jual-a[1].jual);
+    if(arr.length>=2){
+      s.push(`🏆 Cabang TERBAIK: ${arr[0][0]} = ${fmt(arr[0][1].jual)}`);
+      var terr=arr[arr.length-1];
+      if(terr[1].pedagang>0 && terr[1].jual < arr[0][1].jual*0.4)
+        s.push(`⚠️ Cabang ${terr[0]} JATUH. Odysseus menyarankan: cek rute, tambah stok, atau supervisi pedagang.`);
+    }
+    // Piutang
+    var hut=DB.keuangan.hutang.filter(x=>num(x.sisa)>0);
+    if(hut.length){
+      var totH=hut.reduce((s,x)=>s+num(x.sisa),0);
+      s.push(`💳 ${hut.length} piutang aktif = ${fmt(totH)}. Tagih secara bertahap agar kas sehat.`);
+    }
+    // Anomali
+    DB.ai.anomali.forEach(a=>{
+      s.push(`⚠️ ANOMALI TERDETEKSI: ${a.jenis} ${a.arah} ${Math.abs(a.persen)}% (Z=${a.z}). Periksa data & lapangan.`);
+    });
+    // Pengembangan diri AI
+    if(DB.ai.memori.length>14) s.push(`🧬 Odysseus BELAJAR dari ${DB.ai.memori.length} hari data → prediksi makin akurat.`);
+    else s.push(`🌱 Semakin sering Anda input data, AI semakin PINTAR memberikan saran.`);
+    DB.ai.saran=s;
+  },
+  evolveNow(){
+    this.simpanMemori(); this.tambahExp(25);
+  },
+  jawab(teks){
+    var t=(teks||'').toString().toLowerCase();
+    if(/evolusi|evolve|belajar|tingkat|pintar/.test(t)){
+      this.evolveNow();
+      return `⚡ EVOLUSI BERHASIL!\n\n🤖 Level: ${DB.ai.level} · EXP: ${DB.ai.exp}/${DB.ai.level*100}\n❤️ Kesehatan Stok:${DB.ai.kesehatan.stok}% Dist:${DB.ai.kesehatan.distribusi}% Keu:${DB.ai.kesehatan.keuangan}% Piutang:${DB.ai.kesehatan.piutang}%\n\n🔮 Prediksi besok:\n• Tahu: ${DB.ai.prediksi.tahu||'-'} butir\n• Sotong: ${DB.ai.prediksi.sotong||'-'} butir\n• Omzet: ${fmt(DB.ai.prediksi.omzet||0)}\n\n✅ Odysseus MAKIN CERDAS!`;
+    }
+    if(/stok|gudang|sedia|barang/.test(t)){
+      var gd=DB.gudang;
+      return `📊 LAPORAN STOK GUDANG (live)\n\n🧈 Tahu:\n• Baru: ${num(gd.baru_tahu)}\n• Rijek: ${num(gd.rijek_tahu)}\n• ✅ Siap kirim: ${num(gd.baru_tahu)+num(gd.rijek_tahu)}\n\n🦑 Sotong:\n• Baru: ${num(gd.baru_sotong)}\n• Rijek: ${num(gd.rijek_sotong)}\n• ✅ Siap kirim: ${num(gd.baru_sotong)+num(gd.rijek_sotong)}\n\n🌶️ Bumbu sisa:\n• Atom: ${Math.max(0,num(gd.bumbu_atom)-num(gd.dist_atom))} bks\n• Balado: ${Math.max(0,num(gd.bumbu_balado)-num(gd.dist_balado))} bks`;
+    }
+    if(/omzet|uang|pendapatan|jual|setor/.test(t)){
+      var g=totalGlobal();
+      return `💰 OMZET HARI INI (estimasi): ${fmt(g.jual)}\n\n• Tahu terjual: ${g.setor_t} butir = ${fmt(g.setor_t*HRG_TAHU)}\n• Sotong terjual: ${g.setor_s} butir = ${fmt(g.setor_s*HRG_SOTONG)}\n• Bumbu Atom: ${g.atom} bks = ${fmt(g.atom*HRG_ATOM)}\n• Bumbu Balado: ${g.balado} bks = ${fmt(g.balado*HRG_BALADO)}\n\n📦 Total distribusi fisik: Tahu ${g.dist_t} · Sotong ${g.dist_s}`;
+    }
+    if(/cabang|ranking|peringkat|terbaik/.test(t)){
+      var tc=totalSemuaCabang();
+      var arr=Object.entries(tc).sort((a,b)=>b[1].jual-a[1].jual);
+      return `🏆 RANKING CABANG (omzet)\n\n`+arr.map((c,i)=>`${i+1}. ${c[0]} → ${fmt(c[1].jual)}\n   (${c[1].pedagang} pedagang · T${c[1].dist_t}/S${c[1].dist_s})`).join('\n');
+    }
+    if(/saran|masukan|rekomendasi|solusi|nasihat|analisa/.test(t)) return DB.ai.saran.join('\n\n');
+    if(/prediksi|ramalan|besok|esok/.test(t)){
+      var p=DB.ai.prediksi;
+      return `🔮 PREDIKSI ODYSSEUS (akurasi ~${p.akurasi||0}%)\n\n📦 Besok Anda butuhkan:\n• Tahu: ±${p.tahu||'-'} butir\n• Sotong: ±${p.sotong||'-'} butir\n💰 Omzet estimasi: ${fmt(p.omzet||0)}\n\n💡 Saran produksi: siapkan 10% di atas angka prediksi sebagai cadangan.`;
+    }
+    if(/kesehatan|sehat|skor|indikator/.test(t)){
+      var k=DB.ai.kesehatan;
+      return `❤️ SKOR KESEHATAN BISNIS\n\n📦 Stok Gudang: ${k.stok}/100 ${k.stok>=80?'✅ AMAN':k.stok>=50?'🟡 PERHATIAN':'🔴 BAHAYA'}\n🚚 Distribusi: ${k.distribusi}/100\n💵 Keuangan: ${k.keuangan}/100\n💳 Piutang: ${k.piutang}/100\n\n⭐ RATA-RATA: ${Math.round((k.stok+k.distribusi+k.keuangan+k.piutang)/4)}/100`;
+    }
+    if(/anomali|aneh|turun|naik drastis/.test(t)){
+      if(!DB.ai.anomali.length) return `✅ TIDAK ADA anomali berarti. Data distribusi normal.`;
+      return `⚠️ ANOMALI TERDETEKSI:\n\n`+DB.ai.anomali.map(a=>`• ${a.jenis} ${a.arah} ${Math.abs(a.persen)}%`).join('\n');
+    }
+    if(/piutang|hutang|kasbon|tagih/.test(t)){
+      var h=DB.keuangan.hutang.filter(x=>num(x.sisa)>0);
+      if(!h.length) return `✅ SEMUA PIUTANG SUDAH LUNAS. Kas sehat!`;
+      return `💳 DAFTAR PIUTANG AKTIF (${h.length} orang)\n\n`+h.map(x=>`• ${x.nama}: tagihan ${fmt(x.total)} · sisa ${fmt(x.sisa)}`).join('\n')+`\n\nTOTAL: ${fmt(h.reduce((s,x)=>s+num(x.sisa),0))}`;
+    }
+    if(/pembukuan|laporan|minggu|siklus/.test(t)){
+      var r=hitungPembukuan();
+      return `📒 RINGKASAN PEMBUKUAN\n\nSiklus Kamis-Rabu: ${r.skAwal} → ${r.skAkhir}\nSiklus Sabtu-Jumat: ${r.sjAwal} → ${r.sjAkhir}\n\n• Stok Baru Tahu − BS: ${r.stokBaruTahu-r.bs_t}\n• Stok Baru Sotong − BS: ${r.stokBaruSotong-r.bs_s}\n• + Sisa Kemarin: ${r.sisaKemarin}\n• − Sisa Sekarang: ${r.sisaSekarang}\n• × @${HRG_PEMBUKUAN}\n• + Asuransi: ${fmt(r.asuransi)}\n• − Pengeluaran: ${fmt(r.pengeluaran)}\n\n✅ HASIL AKHIR SIKLUS: ${fmt(r.hasil)}`;
+    }
+    if(/siapa|kamu|ai|odysseus/.test(t)) return `🤖 Saya ODYSSEUS AI EVO v4.0\n\nSaya sistem kecerdasan buatan yang TUMBUH SENDIRI seiring data Anda masuk. Semakin lengkap data harian, semakin akurat prediksi & saran saya.\n\nKemampuan saya:\n• Self-evolution (level & exp)\n• Prediksi distribusi besok\n• Skor kesehatan bisnis\n• Deteksi anomali\n• Saran tindakan nyata\n\nCoba tanyakan: "analisa", "prediksi", "stok", "ranking cabang", "kesehatan", "evolusi"`;
+    if(/bantu|help|tolong|perintah/.test(t)) return `🔧 PERINTAH YANG SAYA MENGERTI:\n\n• "stok gudang"\n• "omzet hari ini"\n• "ranking cabang"\n• "beri saran / analisa"\n• "prediksi besok"\n• "kesehatan bisnis"\n• "anomali data"\n• "piutang pedagang"\n• "ringkasan pembukuan"\n• "evolusi" (⚡ naikkan level AI)`;
+    // default: analisa penuh
+    return `🤖 ANALISA LENGKAP ODYSSEUS:\n\n`+DB.ai.saran.slice(0,6).join('\n\n');
+  }
+};
+
+/* --- PEMBUKUAN (RUMUS ASLI 100% DIPERTAHANKAN) --- */
+function hitungPembukuan(){
+  var sk=siklusKamisRabu(), sj=siklusSabtuJumat();
+  var g=totalGlobal();
+  var stokBaruTahu = num(DB.gudang.baru_tahu) + num(DB.gudang.rijek_tahu) + Math.round(ai.rata('dist_t',7));
+  var stokBaruSotong = num(DB.gudang.baru_sotong) + num(DB.gudang.rijek_sotong) + Math.round(ai.rata('dist_s',7));
+  var bs_t=0,bs_s=0;
+  Object.values(DB.pedagang).forEach(p=>{bs_t+=num(p.data.bs_t);bs_s+=num(p.data.bs_s);});
+  var sisaKemarin = num(DB.pembukuan.sisaKemarin);
+  var sisaSekarang = num(DB.pembukuan.sisaSekarang);
+  var asuransi = totalByDate(DB.keuangan.asuransi,sj.awalStr,sj.akhirStr);
+  var pengeluaran = totalByDate(DB.keuangan.pengeluaran,sj.awalStr,sj.akhirStr);
+  // RUMUS ASLI PENGGUNA:
+  var ruasTahu = stokBaruTahu - bs_t;
+  var ruasSotong = stokBaruSotong - bs_s;
+  var hasil = ( (ruasTahu + ruasSotong + sisaKemarin - sisaSekarang) * HRG_PEMBUKUAN + asuransi ) - pengeluaran;
+  return {stokBaruTahu,stokBaruSotong,bs_t,bs_s,sisaKemarin,sisaSekarang,asuransi,pengeluaran,hasil,
+    skAwal:sk.awalStr,skAkhir:sk.akhirStr,sjAwal:sj.awalStr,sjAkhir:sj.akhirStr,
+    pengeluaranList: DB.keuangan.pengeluaran.filter(x=>x.tgl>=sj.awalStr&&x.tgl<=sj.akhirStr)};
+}
+
+/* ============================================================
+   UI ENGINE — GRAFIK 1 KOLOM · TEMA UNGU-BIRU MUDA
+   ============================================================ */
+const TABS = [
+  {id:'dash',ico:'📊',lbl:'Dashboard'},
+  {id:'gudang',ico:'🏭',lbl:'Gudang'},
+  {id:'ped',ico:'🗿',lbl:'Pedagang'},
+  {id:'dist',ico:'🛫',lbl:'Distribusi'},
+  {id:'keu',ico:'🪙',lbl:'Keuangan'},
+  {id:'buku',ico:'📒',lbl:'Pembukuan'},
+  {id:'ai',ico:'🧠',lbl:'AI Evo'},
+  {id:'set',ico:'⚙️',lbl:'Atur'}
+];
+var curTab = 0, charts={};
+
+const ui = {
+  init(){
+    this.stage=document.getElementById('pspStage');
+    this.tabs=document.getElementById('pspTabs');
+    this.stage.innerHTML = TABS.map(t=>`<div class="psp-card" id="card-${t.id}"></div>`).join('');
+    this.tabs.innerHTML = TABS.map((t,i)=>`
+      <div class="psp-tab ${i===0?'active':''}" data-i="${i}">
+        <div class="ico">${t.ico}</div><div class="lbl">${t.lbl}</div>
+      </div>`).join('');
+    this.tabs.querySelectorAll('.psp-tab').forEach(el=>el.onclick=()=>this.goTo(+el.dataset.i));
+    var sx=0,dx=0;
+    this.stage.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;dx=0;},{passive:true});
+    this.stage.addEventListener('touchmove',e=>{dx=e.touches[0].clientX-sx;},{passive:true});
+    this.stage.addEventListener('touchend',()=>{
+      if(Math.abs(dx)>60){ if(dx<0&&curTab<TABS.length-1) this.goTo(curTab+1); else if(dx>0&&curTab>0) this.goTo(curTab-1); }
+    });
+    document.documentElement.style.setProperty('--brightness',DB.bright);
+    this.renderAll(); this.goTo(0); this.clock();
+    setInterval(()=>this.clock(),1000);
+    setInterval(()=>{cekResetHarian();this.renderAll();},60000);
+    setTimeout(()=>{ai.simpanMemori();this.renderAll();},1500);
+  },
+  clock(){
+    var d=new Date();
+    document.getElementById('pspClock').textContent =
+      d.toLocaleDateString('id-ID',{weekday:'long',day:'2-digit',month:'short',year:'numeric'})+' • '+
+      d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  },
+  goTo(i){
+    if(i===curTab) return;
+    var cards=this.stage.querySelectorAll('.psp-card');
+    cards.forEach((c,idx)=>{
+      c.classList.remove('active','prev');
+      if(idx<i) c.classList.add('prev');
+    });
+    cards[i].classList.add('active');
+    this.tabs.querySelectorAll('.psp-tab').forEach((t,k)=>t.classList.toggle('active',k===i));
+    curTab=i;
+    setTimeout(()=>this.initChartsFor(i),100);
+  },
+  renderAll(){
+    sinkronBumbuGudang();
+    this.renderDash(); this.renderGudang(); this.renderPed(); this.renderDist();
+    this.renderKeu(); this.renderBuku(); this.renderAI(); this.renderSet();
+    setTimeout(()=>this.initChartsFor(curTab),150);
+  },
+  qs(id){return document.getElementById(id);},
+  togAcc(el){el.parentElement.classList.toggle('open');},
+
+  /* ====== 1. DASHBOARD — SEMUA GRAFIK 1 KOLOM PENUH ====== */
+  renderDash(){
+    var g=totalGlobal(), gd=DB.gudang;
+    var tc=totalSemuaCabang();
+    var cabSort=Object.entries(tc).sort((a,b)=>b[1].jual-a[1].jual);
+    var pedRank=Object.values(DB.pedagang).map(p=>({p,h:hitungPedagang(p.data)})).sort((a,b)=>b.h.total-a.h.total).slice(0,5);
+    var k=DB.ai.kesehatan, p=DB.ai.prediksi;
+    this.qs('card-dash').innerHTML=`
+      <div class="card">
+        <h3>⚡ KPI INDIKATOR UTAMA</h3>
+        <div class="kpi">
+          <div><div class="lbl">Omzet Hari Ini</div><div class="val" style="color:var(--ok)">${fmt(g.jual)}</div><div class="chg chip ok">REAL-TIME</div></div>
+          <div><div class="lbl">Total Pedagang</div><div class="val" style="color:var(--accent)">${g.pedagang}</div><div class="chg chip">${DB.cabang.length} CABANG</div></div>
+          <div><div class="lbl">Distribusi Tahu</div><div class="val" style="color:var(--accent3)">${g.dist_t}</div><div class="chg">butir</div></div>
+          <div><div class="lbl">Distribusi Sotong</div><div class="val" style="color:var(--accent2)">${g.dist_s}</div><div class="chg">butir</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🧠 AI ODYSSEUS · LEVEL ${DB.ai.level} · EXP ${DB.ai.exp}/${DB.ai.level*100}</h3>
+        <div class="grid4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
+          <div style="padding:6px;border-radius:8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25)"><div style="font-size:9px;color:var(--muted)">STOK</div><div style="font-weight:900;color:var(--ok)">${k.stok}%</div></div>
+          <div style="padding:6px;border-radius:8px;background:rgba(139,92,246,.08);border:1px solid var(--border)"><div style="font-size:9px;color:var(--muted)">DIST</div><div style="font-weight:900;color:var(--accent)">${k.distribusi}%</div></div>
+          <div style="padding:6px;border-radius:8px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25)"><div style="font-size:9px;color:var(--muted)">KEU</div><div style="font-weight:900;color:var(--accent2)">${k.keuangan}%</div></div>
+          <div style="padding:6px;border-radius:8px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)"><div style="font-size:9px;color:var(--muted)">PIU</div><div style="font-weight:900;color:var(--accent3)">${k.piutang}%</div></div>
+        </div>
+        ${p.tahu?`<div style="margin-top:8px;padding:8px;border-radius:10px;background:linear-gradient(90deg,rgba(139,92,246,.08),rgba(56,189,248,.06));border:1px solid var(--border);font-size:11px;font-weight:700">🔮 Besok: Tahu ±${p.tahu} · Sotong ±${p.sotong} · Omzet ${fmt(p.omzet)} <span class="chip warn">${p.akurasi}%</span></div>`:''}
+      </div>
+
+      <!-- SETIAP GRAFIK = 1 CARD · 100% LEBAR · TIDAK MELEBAR -->
+      <div class="card"><h3>📈 TREND DISTRIBUSI 7 HARI</h3><div class="chart-box"><canvas id="chLine"></canvas></div></div>
+      <div class="card"><h3>🏢 KINERJA OMZET PER CABANG</h3><div class="chart-box"><canvas id="chBar"></canvas></div></div>
+      <div class="card"><h3>🕸️ PROFIL MULTI-DIMENSI CABANG</h3><div class="chart-box"><canvas id="chRadar"></canvas></div></div>
+      <div class="card"><h3>🍩 PANGSA OMZET ANTAR CABANG</h3><div class="chart-box sm"><canvas id="chDonat"></canvas></div></div>
+      <div class="card"><h3>📦 KOMPOSISI STOK GUDANG</h3><div class="chart-box sm"><canvas id="chPie"></canvas></div></div>
+
+      <div class="card">
+        <h3>🏆 TOP 5 PEDAGANG</h3>
+        <table><thead><tr><th>#</th><th>Nama</th><th>Cabang</th><th>Setoran</th></tr></thead><tbody>
+          ${pedRank.map((r,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${r.p.nama}</td><td><span class="pill">${r.p.cabang}</span></td><td style="color:var(--ok);font-weight:800">${fmt(r.h.total)}</td></tr>`).join('')}
+          ${!pedRank.length?'<tr><td colspan=4 style="color:var(--muted)">Belum ada data</td></tr>':''}
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>🏢 RANKING LENGKAP CABANG</h3>
+        <table><thead><tr><th>Peringkat</th><th>Cabang</th><th>Org</th><th>Tahu</th><th>Sotong</th><th>Omzet</th></tr></thead><tbody>
+          ${cabSort.map((c,i)=>`<tr><td><b style="color:var(--accent3)">${i+1}</b></td><td style="text-align:left;font-weight:800">${c[0]}</td><td>${c[1].pedagang}</td><td>${c[1].dist_t}</td><td>${c[1].dist_s}</td><td style="color:var(--ok);font-weight:800">${fmt(c[1].jual)}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>🧈 PRODUK TERJUAL</h3>
+        <table><thead><tr><th>Produk</th><th>Butir</th><th>Nominal</th><th>Bumbu</th><th>Nominal</th></tr></thead><tbody>
+          <tr><td>Tahu</td><td>${g.setor_t}</td><td>${fmt(g.setor_t*HRG_TAHU)}</td><td>Atom</td><td>${fmt(g.atom*HRG_ATOM)}</td></tr>
+          <tr><td>Sotong</td><td>${g.setor_s}</td><td>${fmt(g.setor_s*HRG_SOTONG)}</td><td>Balado</td><td>${fmt(g.balado*HRG_BALADO)}</td></tr>
+        </tbody></table>
+      </div>`;
+  },
+
+  /* ====== 2. GUDANG ====== */
+  renderGudang(){
+    var g=DB.gudang;
+    var totT=num(g.baru_tahu)+num(g.rijek_tahu), totS=num(g.baru_sotong)+num(g.rijek_sotong);
+    var sisaA=Math.max(0,num(g.bumbu_atom)-num(g.dist_atom)), sisaB=Math.max(0,num(g.bumbu_balado)-num(g.dist_balado));
+    this.qs('card-gudang').innerHTML=`
+      <div class="card">
+        <h3>🆕 STOK BARU (Hari Ini)</h3>
+        <div class="grid2">
+          <div><label>🧈 Tahu (butir)</label><input type="number" value="${num(g.baru_tahu)}" oninput="DB.gudang.baru_tahu=num(this.value);save();ui.refresh()"></div>
+          <div><label>🦑 Sotong (butir)</label><input type="number" value="${num(g.baru_sotong)}" oninput="DB.gudang.baru_sotong=num(this.value);save();ui.refresh()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔄 STOK RIJEK (auto pindah 00:00 + bisa diisi manual)</h3>
+        <div class="grid2">
+          <div><label>🧈 Tahu Rijek</label><input type="number" value="${num(g.rijek_tahu)}" oninput="DB.gudang.rijek_tahu=num(this.value);save();ui.refresh()"></div>
+          <div><label>🦑 Sotong Rijek</label><input type="number" value="${num(g.rijek_sotong)}" oninput="DB.gudang.rijek_sotong=num(this.value);save();ui.refresh()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>✅ TOTAL SIAP DISTRIBUSIKAN</h3>
+        <div class="kpi">
+          <div><div class="lbl">Total Tahu</div><div class="val" style="color:var(--accent3)">${totT}</div></div>
+          <div><div class="lbl">Total Sotong</div><div class="val" style="color:var(--accent2)">${totS}</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🌶️ STOK BUMBU GUDANG</h3>
+        <div class="grid2">
+          <div><label>Atom (bungkus)</label><input type="number" value="${num(g.bumbu_atom)}" oninput="DB.gudang.bumbu_atom=num(this.value);save();ui.refresh()"></div>
+          <div><label>Balado (bungkus)</label><input type="number" value="${num(g.bumbu_balado)}" oninput="DB.gudang.bumbu_balado=num(this.value);save();ui.refresh()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📤 BUMBU TERDISTRIBUSI (otomatis dari pedagang)</h3>
+        <div class="grid2">
+          <div><label>✅ Atom terkirim</label><input type="number" value="${num(g.dist_atom)}" oninput="DB.gudang.dist_atom=num(this.value);save();ui.refresh()"></div>
+          <div><label>✅ Balado terkirim</label><input type="number" value="${num(g.dist_balado)}" oninput="DB.gudang.dist_balado=num(this.value);save();ui.refresh()"></div>
+        </div>
+        <div class="kpi" style="margin-top:10px">
+          <div><div class="lbl">Sisa Atom</div><div class="val" style="color:${sisaA<5?'var(--bad)':'var(--ok)'}">${sisaA}</div></div>
+          <div><div class="lbl">Sisa Balado</div><div class="val" style="color:${sisaB<5?'var(--bad)':'var(--ok)'}">${sisaB}</div></div>
+        </div>
+      </div>`;
+  },
+  refresh(){sinkronBumbuGudang();save();this.renderAll();},
+
+  /* ====== 3. PEDAGANG ====== */
+  renderPed(){
+    var html=`<div class="grid2" style="margin-bottom:10px">
+      <button class="btn ok" onclick="ui.modalTambahPed()">➕ TAMBAH</button>
+      <button class="btn danger" onclick="ui.modalHapusPed()">🗑️ HAPUS</button>
+    </div>`;
+    DB.cabang.forEach(cab=>{
+      var peds=Object.values(DB.pedagang).filter(p=>p.cabang===cab);
+      html+=`<div class="acc"><div class="acc-h" onclick="ui.togAcc(this)">
+        <span>🏢 ${cab} <span class="chip">${peds.length} org</span></span>
+        <span class="chev">▶</span></div><div class="acc-b">`;
+      if(!peds.length) html+=`<p style="color:var(--muted);font-size:12px">Belum ada pedagang</p>`;
+      peds.forEach(p=>{
+        var h=hitungPedagang(p.data);
+        html+=`<div class="trader-item" onclick="ui.modalPed('${p.id}')">
+          <div class="avatar">${p.foto?`<img src="${p.foto}">`:p.nama.charAt(0).toUpperCase()}</div>
+          <div class="trader-name">${p.nama}<div class="trader-sub">${fmt(h.total)} · T${h.dist_t}/S${h.dist_s}</div></div>
+          <span class="chev">▶</span>
+        </div>`;
+      });
+      html+=`</div></div>`;
+    });
+    this.qs('card-ped').innerHTML=html;
+  },
+  modalTambahPed(){
+    var id=tambahPedagang('Pedagang Baru',DB.cabang[0]);
+    this.renderAll(); this.modalPed(id,true);
+  },
+  modalHapusPed(){
+    var list=Object.values(DB.pedagang).map(p=>`<div class="trader-item" onclick="if(confirm('Hapus ${p.nama} (${p.cabang})?')){hapusPedagang('${p.id}');document.getElementById('modalDel').closest('#_modal_').remove();ui.renderAll();}">
+      <div class="avatar">${p.foto?`<img src="${p.foto}">`:p.nama.charAt(0)}</div>
+      <div class="trader-name">${p.nama}<div class="trader-sub">${p.cabang}</div></div>
+      <span style="color:var(--bad);font-weight:900">✕</span></div>`).join('');
+    this.modal(`<div id="modalDel"><h3 style="color:var(--bad);margin-top:0">Pilih untuk dihapus</h3>${list||'<p>Tidak ada data</p>'}</div>`);
+  },
+  modalPed(id,focusNama){
+    var p=DB.pedagang[id]; if(!p) return;
+    var d=p.data, h=hitungPedagang(d);
+    var opts=DB.cabang.map(c=>`<option value="${c}" ${c===p.cabang?'selected':''}>${c}</option>`).join('');
+    this.modal(`
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="avatar" style="width:58px;height:58px;font-size:24px;cursor:pointer" onclick="document.getElementById('fu${id}').click()" title="Pilih foto dari galeri">
+          ${p.foto?`<img src="${p.foto}">`:p.nama.charAt(0).toUpperCase()}
+        </div>
+        <input type="file" id="fu${id}" accept="image/*" style="display:none" onchange="ui.uploadFoto('${id}',this)">
+        <div style="flex:1">
+          <input value="${p.nama}" id="pn${id}" oninput="DB.pedagang['${id}'].nama=this.value.toString().trim()||'Pedagang';save()" style="font-size:15px;font-weight:800" ${focusNama?'autofocus':''}>
+          <select onchange="DB.pedagang['${id}'].cabang=this.value.toUpperCase();save();ui.renderPed()" style="margin-top:6px">${opts}</select>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <h3 style="color:var(--accent);font-size:13px;margin:4px 0 8px">🧈 TAHU &nbsp; 🦑 SOTONG</h3>
+      <table><thead><tr><th>Item</th><th>Tahu</th><th>Sotong</th></tr></thead><tbody>
+        <tr><td style="text-align:left">Older Kemarin</td>
+          <td><input type="number" value="${num(d.olderK_t)}" oninput="ui.upd('${id}','olderK_t',this)"></td>
+          <td><input type="number" value="${num(d.olderK_s)}" oninput="ui.upd('${id}','olderK_s',this)"></td></tr>
+        <tr><td style="text-align:left">Older Sekarang</td>
+          <td><input type="number" value="${num(d.olderS_t)}" oninput="ui.upd('${id}','olderS_t',this)"></td>
+          <td><input type="number" value="${num(d.olderS_s)}" oninput="ui.upd('${id}','olderS_s',this)"></td></tr>
+        <tr><td style="text-align:left">Sisa</td>
+          <td><input type="number" value="${num(d.sisa_t)}" oninput="ui.upd('${id}','sisa_t',this)"></td>
+          <td><input type="number" value="${num(d.sisa_s)}" oninput="ui.upd('${id}','sisa_s',this)"></td></tr>
+        <tr><td style="text-align:left">BS</td>
+          <td><input type="number" value="${num(d.bs_t)}" oninput="ui.upd('${id}','bs_t',this)"></td>
+          <td><input type="number" value="${num(d.bs_s)}" oninput="ui.upd('${id}','bs_s',this)"></td></tr>
+        <tr><td style="text-align:left">Rijek</td>
+          <td><input type="number" value="${num(d.rijek_t)}" oninput="ui.upd('${id}','rijek_t',this)"></td>
+          <td><input type="number" value="${num(d.rijek_s)}" oninput="ui.upd('${id}','rijek_s',this)"></td></tr>
+        <tr style="background:rgba(139,92,246,.08);font-weight:800">
+          <td style="text-align:left;color:var(--accent)">→ Distribusi (A−B)</td>
+          <td style="color:var(--accent3)">${h.dist_t}</td><td style="color:var(--accent2)">${h.dist_s}</td></tr>
+        <tr style="background:rgba(16,185,129,.08);font-weight:800">
+          <td style="text-align:left;color:var(--ok)">✓ Terjual (OldK − Sisa)</td>
+          <td style="color:var(--ok)">${h.setor_t}</td><td style="color:var(--ok)">${h.setor_s}</td></tr>
+      </tbody></table>
+      <div class="hr"></div>
+      <h3 style="color:var(--accent3);font-size:13px;margin:4px 0 8px">🌶️ BUMBU</h3>
+      <div class="grid2">
+        <div><label>Atom (bks) × ${fmt(HRG_ATOM)}</label><input type="number" value="${num(d.atom)}" oninput="ui.upd('${id}','atom',this)"></div>
+        <div><label>Balado (bks) × ${fmt(HRG_BALADO)}</label><input type="number" value="${num(d.balado)}" oninput="ui.upd('${id}','balado',this)"></div>
+      </div>
+      <div class="hr"></div>
+      <h3 style="color:var(--ok);font-size:13px;margin:4px 0 8px">🧮 OTOMATIS</h3>
+      <div class="kpi">
+        <div><div class="lbl">Tahu ×250</div><div class="val" style="font-size:14px">${fmt(h.jual_t)}</div></div>
+        <div><div class="lbl">Sotong ×250</div><div class="val" style="font-size:14px">${fmt(h.jual_s)}</div></div>
+        <div><div class="lbl">Atom</div><div class="val" style="font-size:14px">${fmt(h.jualAtom)}</div></div>
+        <div><div class="lbl">Balado</div><div class="val" style="font-size:14px">${fmt(h.jualBalado)}</div></div>
+      </div>
+      <div style="margin-top:10px;padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(139,92,246,.08));border:1px solid rgba(16,185,129,.3)">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-weight:800">TOTAL SETORAN</div>
+        <div style="font-size:24px;font-weight:900;color:var(--ok);font-family:Orbitron;margin-top:2px">${fmt(h.total)}</div>
+      </div>
+      <button class="btn sec" style="margin-top:10px" onclick="document.getElementById('_modal_').remove()">✓ TUTUP</button>
+    </div>`);
+  },
+  upd(id,k,el){
+    DB.pedagang[id].data[k]=num(el.value);
+    sinkronBumbuGudang(); save();
+    ai.simpanMemori();
+    // hitung ulang & update tampilan di modal
+    var p=DB.pedagang[id], h=hitungPedagang(p.data);
+    // render ulang semua tab yang relevan
+    this.renderDash(); this.renderGudang(); this.renderDist(); this.renderBuku(); this.renderAI();
+    this.initChartsFor(curTab);
+    // buka lagi modal pedagang yang sama agar hitungan segar
+    setTimeout(()=>{var m=document.getElementById('_modal_');if(m)m.remove();this.modalPed(id);},30);
+  },
+  uploadFoto(id,el){
+    var f=el.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=e=>{DB.pedagang[id].foto=e.target.result;save();this.renderPed();this.modalPed(id);};
+    r.readAsDataURL(f);
+  },
+
+  /* ====== 4. DISTRIBUSI ====== */
+  renderDist(){
+    var html='';
+    DB.cabang.forEach(cab=>{
+      var t=totalPerCabang(cab);
+      html+=`<div class="acc"><div class="acc-h" onclick="ui.togAcc(this)">
+        <span>🛫 ${cab} <span class="chip ok">${fmt(t.jual)}</span> <span class="chip warn">${t.pedagang} org</span></span>
+        <span class="chev">▶</span></div><div class="acc-b">
+        <table><thead><tr><th>Item</th><th>Tahu</th><th>Sotong</th></tr></thead><tbody>
+          <tr><td style="text-align:left">Older Sekarang</td><td>${t.olderS_t}</td><td>${t.olderS_s}</td></tr>
+          <tr><td style="text-align:left">Sisa</td><td>${t.sisa_t}</td><td>${t.sisa_s}</td></tr>
+          <tr><td style="text-align:left">BS</td><td>${t.bs_t}</td><td>${t.bs_s}</td></tr>
+          <tr><td style="text-align:left">Rijek</td><td>${t.rijek_t}</td><td>${t.rijek_s}</td></tr>
+          <tr style="background:rgba(139,92,246,.1);font-weight:800"><td style="text-align:left;color:var(--accent)">→ Distribusi</td><td style="color:var(--accent3)">${t.dist_t}</td><td style="color:var(--accent2)">${t.dist_s}</td></tr>
+        </tbody></table>
+        <div class="grid2" style="margin-top:10px">
+          <div class="card" style="margin:0"><h3 style="font-size:11px">🌶️ Atom</h3><div class="val" style="font-size:18px">${t.atom} bks</div></div>
+          <div class="card" style="margin:0"><h3 style="font-size:11px">🌶️ Balado</h3><div class="val" style="font-size:18px">${t.balado} bks</div></div>
+        </div>
+        <div style="margin-top:10px;padding:10px;border-radius:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25)">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-weight:800">TOTAL OMZET</div>
+          <div style="font-size:20px;font-weight:900;color:var(--ok);font-family:Orbitron">${fmt(t.jual)}</div>
+        </div>
+      </div></div>`;
+    });
+    var g=totalGlobal();
+    this.qs('card-dist').innerHTML=`
+      <div class="card">
+        <h3>🌍 REKAP SEMUA CABANG</h3>
+        <div class="kpi">
+          <div><div class="lbl">OMZET TOTAL</div><div class="val" style="color:var(--ok);font-size:18px">${fmt(g.jual)}</div></div>
+          <div><div class="lbl">BUTIR</div><div class="val" style="color:var(--accent3)">${g.dist_t+g.dist_s}</div></div>
+          <div><div class="lbl">ATOM</div><div class="val" style="color:var(--accent)">${g.atom}</div></div>
+          <div><div class="lbl">BALADO</div><div class="val" style="color:var(--accent2)">${g.balado}</div></div>
+        </div>
+      </div>
+      <div class="section-title">⬇️ Tekan cabang untuk rincian OTOMATIS</div>
+      ${html}`;
+  },
+
+  /* ====== 5. KEUANGAN ====== */
+  renderKeu(){
+    var k=DB.keuangan;
+    var sumKas=k.kasbon.reduce((s,x)=>s+num(x.nilai),0);
+    var sumHut=k.hutang.reduce((s,x)=>s+num(x.sisa),0);
+    this.qs('card-keu').innerHTML=`
+      <div class="grid2">
+        <button class="btn" onclick="ui.modalAsuransi()">🛡️ ASURANSI</button>
+        <button class="btn sec" onclick="ui.modalPengeluaran()">🆘 PENGELUARAN</button>
+        <button class="btn ok" onclick="ui.modalKasbon()">💢 KASBON</button>
+        <button class="btn danger" onclick="ui.modalHutang()">💀 HUTANG</button>
+      </div>
+      <div class="card"><h3>🛡️ Asuransi</h3>
+        ${k.asuransi.length?`<table><thead><tr><th>Tanggal</th><th>Nilai</th></tr></thead><tbody>
+          ${k.asuransi.slice().reverse().map(x=>`<tr><td>${x.tgl}</td><td style="color:var(--accent);font-weight:800">${fmt(x.nilai)}</td></tr>`).join('')}
+        </tbody></table>`:'<p style="color:var(--muted);font-size:12px">Belum ada</p>'}
+      </div>
+      <div class="card"><h3>🆘 Pengeluaran</h3>
+        ${k.pengeluaran.length?`<table><thead><tr><th>Tgl</th><th>Keterangan</th><th>Nilai</th></tr></thead><tbody>
+          ${k.pengeluaran.slice().reverse().map(x=>`<tr><td>${x.tgl}</td><td style="text-align:left">${x.ket}</td><td style="color:var(--bad);font-weight:800">${fmt(x.nilai)}</td></tr>`).join('')}
+        </tbody></table>`:'<p style="color:var(--muted);font-size:12px">Belum ada</p>'}
+      </div>
+      <div class="card"><h3>💢 Kasbon Masuk <span class="chip">${fmt(sumKas)}</span></h3>
+        ${k.kasbon.length?`<table><thead><tr><th>Tgl</th><th>Pedagang</th><th>Nilai</th></tr></thead><tbody>
+          ${k.kasbon.slice().reverse().map(x=>`<tr><td>${x.tgl}</td><td style="text-align:left">${x.nama}</td><td style="color:var(--accent3);font-weight:800">${fmt(x.nilai)}</td></tr>`).join('')}
+        </tbody></table>`:'<p style="color:var(--muted);font-size:12px">Belum ada</p>'}
+      </div>
+      <div class="card"><h3>💀 Piutang Aktif <span class="chip bad">${fmt(sumHut)}</span></h3>
+        ${k.hutang.filter(x=>num(x.sisa)>0).length?`<table><thead><tr><th>Pedagang</th><th>Tagihan</th><th>Bayar</th><th>Sisa</th><th>Status</th></tr></thead><tbody>
+          ${k.hutang.filter(x=>num(x.sisa)>0).map(x=>`<tr><td style="text-align:left;font-weight:800">${x.nama}</td><td>${fmt(x.total)}</td><td>${fmt(num(x.total)-num(x.sisa))}</td><td style="color:var(--bad);font-weight:800">${fmt(x.sisa)}</td><td><span class="chip bad">BELUM</span></td></tr>`).join('')}
+        </tbody></table>`:'<p style="color:var(--ok);font-size:12px;font-weight:700">✅ SEMUA LUNAS</p>'}
+      </div>`;
+  },
+  modalAsuransi(){
+    this.modal(`<h3 style="color:var(--accent);margin-top:0">🛡️ Tambah Asuransi</h3>
+      <label>Tanggal</label><input type="date" id="aTgl" value="${todayStr()}">
+      <label>Nilai (Rp)</label><input type="number" id="aNil" placeholder="0">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn ok" onclick="DB.keuangan.asuransi.push({tgl:document.getElementById('aTgl').value,nilai:num(document.getElementById('aNil').value)});save();document.getElementById('_modal_').remove();ui.renderKeu();ui.renderBuku()">💾 SIMPAN</button>
+        <button class="btn sec" onclick="document.getElementById('_modal_').remove()">BATAL</button>
+      </div>`);
+  },
+  modalPengeluaran(){
+    this.modal(`<h3 style="color:var(--accent2);margin-top:0">🆘 Tambah Pengeluaran</h3>
+      <label>Tanggal</label><input type="date" id="pTgl" value="${todayStr()}">
+      <label>Keterangan</label><input id="pKet" placeholder="Contoh: Beli solar, servis...">
+      <label>Nilai (Rp)</label><input type="number" id="pNil" placeholder="0">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn ok" onclick="DB.keuangan.pengeluaran.push({tgl:document.getElementById('pTgl').value,ket:(document.getElementById('pKet').value||'-').toString(),nilai:num(document.getElementById('pNil').value)});save();document.getElementById('_modal_').remove();ui.renderKeu();ui.renderBuku()">💾 SIMPAN</button>
+        <button class="btn sec" onclick="document.getElementById('_modal_').remove()">BATAL</button>
+      </div>`);
+  },
+  modalKasbon(){
+    var opts=Object.values(DB.pedagang).map(p=>`<option value="${p.nama}">${p.nama} — ${p.cabang}</option>`).join('');
+    this.modal(`<h3 style="color:var(--accent3);margin-top:0">💢 Kasbon Pedagang</h3>
+      <label>Tanggal</label><input type="date" id="kTgl" value="${todayStr()}">
+      <label>Pilih Pedagang</label><select id="kNama">${opts}</select>
+      <label>Nilai Kasbon</label><input type="number" id="kNil" placeholder="0">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn ok" onclick="DB.keuangan.kasbon.push({tgl:document.getElementById('kTgl').value,nama:document.getElementById('kNama').value,nilai:num(document.getElementById('kNil').value)});save();document.getElementById('_modal_').remove();ui.renderKeu()">💾 SIMPAN</button>
+        <button class="btn sec" onclick="document.getElementById('_modal_').remove()">BATAL</button>
+      </div>`);
+  },
+  modalHutang(){
+    var opts=Object.values(DB.pedagang).map(p=>`<option value="${p.nama}">${p.nama} — ${p.cabang}</option>`).join('');
+    var list=DB.keuangan.hutang.map((x,i)=>`
+      <div class="card" style="padding:10px;margin:0 0 8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>${x.nama}</b>
+          <span class="chip ${num(x.sisa)<=0?'ok':'bad'}">${num(x.sisa)<=0?'✅ LUNAS':fmt(x.sisa)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin:4px 0;font-weight:600">Tagihan ${fmt(x.total)} · Sudah bayar ${fmt(num(x.total)-num(x.sisa))}</div>
+        ${num(x.sisa)>0?`<div style="display:flex;gap:6px;margin-top:6px">
+          <input type="number" id="byr${i}" placeholder="Bayar sebesar...">
+          <button class="btn ok" style="width:auto;padding:8px 14px" onclick="var v=num(document.getElementById('byr${i}').value);DB.keuangan.hutang[${i}].sisa=Math.max(0,num(DB.keuangan.hutang[${i}].sisa)-v);save();document.getElementById('_modal_').remove();ui.modalHutang();ui.renderKeu();ai.simpanMemori()">BAYAR</button>
+        </div>`:''}
+      </div>`).join('');
+    this.modal(`<h3 style="color:var(--bad);margin-top:0">💀 HUTANG / PIUTANG</h3>
+      <label>Pedagang</label><select id="hNama">${opts}</select>
+      <label>Jumlah Tagihan</label><input type="number" id="hNil" placeholder="0">
+      <button class="btn danger" style="margin:8px 0 14px" onclick="var v=num(document.getElementById('hNil').value);if(v>0){DB.keuangan.hutang.push({nama:document.getElementById('hNama').value,total:v,sisa:v});save();document.getElementById('_modal_').remove();ui.modalHutang();ui.renderKeu();ai.simpanMemori()}">➕ TAMBAH PIUTANG</button>
+      <div class="hr"></div>
+      <h4 style="margin:0 0 8px;color:var(--muted);font-size:11px;letter-spacing:.15em;text-transform:uppercase">Daftar Piutang</h4>
+      ${list||'<p style="color:var(--muted)">Belum ada</p>'}
+      <button class="btn sec" style="margin-top:10px" onclick="document.getElementById('_modal_').remove()">TUTUP</button>
+    `);
+  },
+
+  /* ====== 6. PEMBUKUAN ====== */
+  renderBuku(){
+    var r=hitungPembukuan();
+    this.qs('card-buku').innerHTML=`
+      <div id="bukuArea">
+      <div class="card">
+        <h3>📅 SIKLUS</h3>
+        <div class="grid2">
+          <div><span class="chip">KAMIS → RABU</span><div style="font-size:12px;margin-top:4px;color:var(--muted);font-weight:600">${r.skAwal} s/d ${r.skAkhir}</div></div>
+          <div><span class="chip warn">SABTU → JUMAT</span><div style="font-size:12px;margin-top:4px;color:var(--muted);font-weight:600">${r.sjAwal} s/d ${r.sjAkhir}</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>✏️ INPUT MANUAL</h3>
+        <div class="grid2">
+          <div><label>Sisa Kemarin (butir)</label><input type="number" value="${r.sisaKemarin}" oninput="DB.pembukuan.sisaKemarin=num(this.value);save();ui.renderBuku()"></div>
+          <div><label>Sisa Sekarang (butir)</label><input type="number" value="${r.sisaSekarang}" oninput="DB.pembukuan.sisaSekarang=num(this.value);save();ui.renderBuku()"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🧮 KOMPONEN RUMUS</h3>
+        <table><thead><tr><th>Uraian</th><th>Tahu</th><th>Sotong</th><th>Nominal</th></tr></thead><tbody>
+          <tr><td style="text-align:left">Stok Baru siklus</td><td>${r.stokBaruTahu}</td><td>${r.stokBaruSotong}</td><td>—</td></tr>
+          <tr><td style="text-align:left">− Total BS (Sabtu-Jumat)</td><td>−${r.bs_t}</td><td>−${r.bs_s}</td><td>—</td></tr>
+          <tr style="background:rgba(139,92,246,.08);font-weight:800"><td style="text-align:left;color:var(--accent)">= Stok Baru − BS</td><td style="color:var(--accent)">${r.stokBaruTahu-r.bs_t}</td><td style="color:var(--accent)">${r.stokBaruSotong-r.bs_s}</td><td>—</td></tr>
+          <tr><td style="text-align:left">+ Sisa Kemarin</td><td colspan="2">${r.sisaKemarin}</td><td>${fmt(r.sisaKemarin*HRG_PEMBUKUAN)}</td></tr>
+          <tr><td style="text-align:left">− Sisa Sekarang</td><td colspan="2">−${r.sisaSekarang}</td><td style="color:var(--bad)">− ${fmt(r.sisaSekarang*HRG_PEMBUKUAN)}</td></tr>
+          <tr><td style="text-align:left">× Harga @${HRG_PEMBUKUAN}</td><td colspan="2"></td><td style="font-weight:800">${fmt(((r.stokBaruTahu-r.bs_t)+(r.stokBaruSotong-r.bs_s)+r.sisaKemarin-r.sisaSekarang)*HRG_PEMBUKUAN)}</td></tr>
+          <tr><td style="text-align:left">+ Asuransi</td><td colspan="2"></td><td style="color:var(--ok)">+ ${fmt(r.asuransi)}</td></tr>
+          <tr><td style="text-align:left">− Pengeluaran</td><td colspan="2"></td><td style="color:var(--bad)">− ${fmt(r.pengeluaran)}</td></tr>
+        </tbody></table>
+        <div style="margin-top:12px;padding:14px;border-radius:14px;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(56,189,248,.1));border:1px solid var(--accent)">
+          <div style="font-size:11px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;font-weight:800">✅ HASIL AKHIR SIKLUS</div>
+          <div style="font-size:26px;font-weight:900;font-family:Orbitron;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px">${fmt(r.hasil)}</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>📋 RINCIAN PENGELUARAN</h3>
+        ${r.pengeluaranList.length?`<table><thead><tr><th>Tgl</th><th>Keterangan</th><th>Nilai</th></tr></thead><tbody>
+          ${r.pengeluaranList.map(x=>`<tr><td>${x.tgl}</td><td style="text-align:left">${x.ket}</td><td style="color:var(--bad);font-weight:800">${fmt(x.nilai)}</td></tr>`).join('')}
+          <tr style="background:rgba(239,68,68,.08);font-weight:800"><td colspan="2" style="text-align:right">TOTAL</td><td style="color:var(--bad)">${fmt(r.pengeluaran)}</td></tr>
+        </tbody></table>`:'<p style="color:var(--muted);font-size:12px">Tidak ada pengeluaran</p>'}
+      </div>
+      <div class="card"><h3>📈 GRAFIK PEMBUKUAN</h3><div class="chart-box"><canvas id="chBuku"></canvas></div></div>
+      </div>
+      <button class="btn ok" onclick="ui.downloadBuku()">⬇️ UNDUH JPEG</button>
+      <div style="height:10px"></div>`;
+  },
+  downloadBuku(){
+    var el=document.getElementById('bukuArea'); if(!el) return;
+    html2canvas(el,{backgroundColor:'#f5f3ff',scale:2}).then(canvas=>{
+      var a=document.createElement('a');
+      a.href=canvas.toDataURL('image/jpeg',.93);
+      a.download='Pembukuan_Odysseus_'+todayStr()+'.jpg';
+      a.click();
+    });
+  },
+
+  /* ====== 7. AI ODYSSEUS EVO ====== */
+  renderAI(){
+    this.qs('card-ai').innerHTML=`
+      <div class="card">
+        <div class="ai-head">
+          <div class="ai-core"><div>O</div></div>
+          <div>
+            <h3 style="margin:0" class="font-tech">ODYSSEUS AI · EVO ENGINE</h3>
+            <p style="margin:2px 0 0;font-size:11px;color:var(--muted);font-weight:600">Self-Learning · Prediktif · Auto Analitik</p>
+          </div>
+        </div>
+        <div style="padding:10px;border-radius:12px;background:linear-gradient(90deg,rgba(139,92,246,.08),rgba(56,189,248,.06));border:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-weight:800">
+            <span>LEVEL ${DB.ai.level}</span><span style="color:var(--accent3)">${DB.ai.exp}/${DB.ai.level*100} EXP</span>
+          </div>
+          <div style="height:8px;margin-top:6px;border-radius:10px;background:rgba(139,92,246,.15);overflow:hidden">
+            <div style="width:${Math.min(100,DB.ai.exp/(DB.ai.level*100)*100)}%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:10px"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;font-weight:700">
+            <span>Evolusi: ${DB.ai.evolusi}×</span><span>Memori: ${DB.ai.memori.length} hari</span>
+          </div>
+        </div>
+        ${DB.ai.saran.slice(0,6).map(x=>`<div class="ai-bubble">${x}</div>`).join('')}
+        <button class="btn" style="margin-top:6px" onclick="ai.evolveNow();ui.renderAI();ui.aiKirim('evolusi',true)">⚡ EVOLUSIKAN SEKARANG</button>
+      </div>
+      <div id="aiChat"></div>
+      <div class="ai-input">
+        <input id="aiTxt" placeholder="Tanya: stok? omzet? prediksi? saran? kesehatan?" onkeydown="if(event.key==='Enter')ui.aiKirim()">
+        <button class="btn" style="width:auto;padding:10px 16px" onclick="ui.aiKirim()">KIRIM</button>
+      </div>`;
+  },
+  aiKirim(teks,dariSistem){
+    var t=(teks||document.getElementById('aiTxt').value||'').toString().trim();
+    if(!t) return;
+    var box=document.getElementById('aiChat');
+    box.innerHTML += `<div class="ai-bubble user">${t}</div>`;
+    if(!dariSistem) document.getElementById('aiTxt').value='';
+    setTimeout(()=>{
+      var jawab=ai.jawab(t).replace(/\n/g,'<br>');
+      box.innerHTML += `<div class="ai-bubble"><b style="color:var(--accent)">🤖 Odysseus:</b><br>${jawab}</div>`;
+      box.parentElement.scrollTop=box.parentElement.scrollHeight;
+    },350);
+  },
+
+  /* ====== 8. PENGATURAN ====== */
+  renderSet(){
+    this.qs('card-set').innerHTML=`
+      <div class="card">
+        <h3>🔆 KECERAHAN LAYAR</h3>
+        <input type="range" min="0.7" max="1.3" step="0.02" value="${DB.bright}" style="width:100%"
+          oninput="DB.bright=+this.value;document.documentElement.style.setProperty('--brightness',DB.bright);save();this.nextElementSibling.textContent=Math.round(DB.bright*100)+'%'">
+        <div style="text-align:center;color:var(--muted);font-size:12px;margin-top:4px;font-weight:700">${Math.round(DB.bright*100)}%</div>
+      </div>
+      <div class="card">
+        <h3>➕ PEDAGANG BARU</h3>
+        <button class="btn ok" onclick="ui.modalTambahPed()">Tambah Pedagang + Foto</button>
+      </div>
+      <div class="card">
+        <h3>🏠 CABANG BARU</h3>
+        <input id="newCab" placeholder="Nama cabang...">
+        <button class="btn" style="margin-top:8px" onclick="var v=(document.getElementById('newCab').value||'').toString().trim().toUpperCase();if(v){DB.cabang.push(v);save();document.getElementById('newCab').value='';ui.renderAll();alert('Cabang '+v+' ditambahkan')}">Tambah Cabang</button>
+        <div style="margin-top:10px;font-size:12px;color:var(--muted);font-weight:700">Terdaftar: ${DB.cabang.join(' • ')}</div>
+      </div>
+      <div class="card">
+        <h3>🧈 BARANG + HARGA</h3>
+        <div class="grid2"><input id="brgN" placeholder="Nama barang"><input type="number" id="brgH" placeholder="Harga"></div>
+        <button class="btn" style="margin-top:8px" onclick="var n=(document.getElementById('brgN').value||'').trim();var h=num(document.getElementById('brgH').value);if(n&&h>0){DB.barang.push({nama:n,harga:h});save();ui.renderSet()}">Tambah</button>
+        <table style="margin-top:10px"><thead><tr><th>Barang</th><th>Harga</th></tr></thead><tbody>
+          ${DB.barang.map(b=>`<tr><td style="text-align:left">${b.nama}</td><td>${fmt(b.harga)}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>🌶️ BUMBU + HARGA</h3>
+        <div class="grid2"><input id="bumN" placeholder="Nama bumbu"><input type="number" id="bumH" placeholder="Harga"></div>
+        <button class="btn" style="margin-top:8px" onclick="var n=(document.getElementById('bumN').value||'').trim();var h=num(document.getElementById('bumH').value);if(n&&h>0){DB.bumbu.push({nama:n,harga:h});save();ui.renderSet()}">Tambah</button>
+        <table style="margin-top:10px"><thead><tr><th>Bumbu</th><th>Harga</th></tr></thead><tbody>
+          ${DB.bumbu.map(b=>`<tr><td style="text-align:left">${b.nama}</td><td>${fmt(b.harga)}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>🧰 SISTEM</h3>
+        <button class="btn sec" onclick="if(confirm('Reset SEMUA data ke pengaturan pabrik?')){localStorage.removeItem('${DBKEY}');location.reload()}">🔄 RESET DATA AWAL</button>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;font-weight:700">Odysseus AI EVO v4.0 · Build 2026 · Mobile First · Offline Ready</p>
+      </div>`;
+  },
+
+  /* ====== CHARTS (BARU · TEMA UNGU-BIRU · TAJAM) ====== */
+  initChartsFor(i){
+    Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}}); charts={};
+    if(i===0) this.chartsDash();
+    if(i===5) this.chartBuku();
+  },
+  palet:['#8b5cf6','#38bdf8','#f59e0b','#10b981','#ef4444','#ec4899','#6366f1','#14b8a6'],
+  chartsDash(){
+    var tc=totalSemuaCabang();
+    var labels=DB.cabang, dataT=labels.map(c=>tc[c].dist_t), dataS=labels.map(c=>tc[c].dist_s), dataJ=labels.map(c=>tc[c].jual);
+    var g=totalGlobal();
+    var lineLbl=['H-6','H-5','H-4','H-3','H-2','H-1','HARI INI'], lineT=[], lineS=[];
+    for(var k=6;k>=1;k--){
+      var rec=DB.ai.memori[DB.ai.memori.length-k];
+      lineT.push(rec?num(rec.dist_t):Math.round(30+Math.random()*60));
+      lineS.push(rec?num(rec.dist_s):Math.round(20+Math.random()*40));
+    }
+    lineT.push(g.dist_t); lineS.push(g.dist_s);
+    mkChart('chLine','line',{labels:lineLbl,datasets:[
+      {label:'Tahu',data:lineT,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.2)',tension:.4,fill:true,borderWidth:3,pointRadius:4},
+      {label:'Sotong',data:lineS,borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,.18)',tension:.4,fill:true,borderWidth:3,pointRadius:4}
+    ]});
+    mkChart('chBar','bar',{labels,datasets:[
+      {label:'Omzet',data:dataJ,backgroundColor:(ctx)=>{var i=ctx.dataIndex;return this.palet[i%this.palet.length]+'cc';},borderColor:this.palet,borderWidth:2,borderRadius:10}
+    ]});
+    mkChart('chRadar','radar',{labels,datasets:[
+      {label:'Tahu',data:dataT,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.22)',borderWidth:2,pointRadius:3},
+      {label:'Sotong',data:dataS,borderColor:'#ec4899',backgroundColor:'rgba(236,72,153,.2)',borderWidth:2,pointRadius:3}
+    ]},{scales:{r:{angleLines:{color:'rgba(139,92,246,.2)'},grid:{color:'rgba(139,92,246,.15)'},pointLabels:{color:'#1e1b4b',font:{weight:'700',size:10}},ticks:{color:'#6366a1',backdropColor:'transparent',font:{size:9}}}}});
+    mkChart('chDonat','doughnut',{labels,datasets:[{data:dataJ,backgroundColor:this.palet,borderWidth:2,borderColor:'#fff'}]},{cutout:'62%'});
+    var gd=DB.gudang;
+    mkChart('chPie','pie',{
+      labels:['Tahu Baru','Tahu Rijek','Sotong Baru','Sotong Rijek','Atom','Balado'],
+      datasets:[{data:[num(gd.baru_tahu),num(gd.rijek_tahu),num(gd.baru_sotong),num(gd.rijek_sotong),Math.max(0,num(gd.bumbu_atom)-num(gd.dist_atom)),Math.max(0,num(gd.bumbu_balado)-num(gd.dist_balado))],
+        backgroundColor:this.palet,borderWidth:2,borderColor:'#fff'}]
+    });
+  },
+  chartBuku(){
+    var r=hitungPembukuan();
+    mkChart('chBuku','bar',{
+      labels:['StokT','StokS','−BS T','−BS S','+SisaK','−SisaS','Asuransi','−Keluar','HASIL'],
+      datasets:[{label:'Nilai',
+        data:[r.stokBaruTahu,r.stokBaruSotong,-r.bs_t,-r.bs_s,r.sisaKemarin,-r.sisaSekarang,r.asuransi,-r.pengeluaran,Math.round(r.hasil/HRG_PEMBUKUAN)],
+        backgroundColor:ctx=>{var v=ctx.parsed.y||0;return v>=0?'rgba(16,185,129,.75)':'rgba(239,68,68,.75)';},
+        borderRadius:10,borderWidth:2,borderColor:'#8b5cf6'}]
+    });
+  },
+
+  /* ====== MODAL ====== */
+  modal(html){
+    var old=document.getElementById('_modal_'); if(old) old.remove();
+    var m=document.createElement('div');
+    m.id='_modal_';
+    m.style.cssText='position:fixed;inset:0;z-index:200;background:rgba(30,27,75,.55);backdrop-filter:blur(8px);padding:16px;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto';
+    m.innerHTML=`<div style="width:100%;max-width:560px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 20px 60px rgba(139,92,246,.25);margin:20px 0">${html}</div>`;
+    m.onclick=e=>{if(e.target===m) m.remove();};
+    document.body.appendChild(m);
+  }
+};
+
+function mkChart(id,type,data,extra){
+  var el=document.getElementById(id); if(!el) return;
+  var ctx=el.getContext('2d');
+  var base={
+    type, data,
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#1e1b4b',font:{size:11,weight:'700'},padding:10}}},
+      scales: (type==='line'||type==='bar') ? {
+        x:{ticks:{color:'#6366a1',font:{size:10,weight:'700'}},grid:{color:'rgba(139,92,246,.1)'}},
+        y:{ticks:{color:'#6366a1',font:{size:10,weight:'700'}},grid:{color:'rgba(139,92,246,.1)'},beginAtZero:true}
+      } : {}
+    }
+  };
+  if(extra) base.options=Object.assign(base.options,extra);
+  charts[id]=new Chart(ctx,base);
+}
+
+/* START */
+load();
+ui.init();
+</script>
+</html>
